@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "E-Guro App",
+    "slug": "e-guro-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "eguro",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eguro.app"
+    },
+    "android": {
+      "package": "com.eguro.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
