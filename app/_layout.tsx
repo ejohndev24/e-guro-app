@@ -4,11 +4,13 @@ import { useFonts } from 'expo-font';
 import { router, Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { apolloClient } from '@/core/apollo/client';
 import { colors } from '@/core/theme';
 import { AuthProvider, useAuth } from '@/core/auth/AuthProvider';
 import { MOBILE_ME_QUERY } from '@/features/auth/graphql/queries';
+import { AppBanner } from '@/shared/components/feedback';
 
 const RootLayout = () => {
   const [fontsLoaded, fontError] = useFonts(Ionicons.font);
@@ -17,9 +19,11 @@ const RootLayout = () => {
   if (!fontsLoaded) return null;
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <AuthProvider><SafeAreaProvider><Navigation /></SafeAreaProvider></AuthProvider>
-    </ApolloProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ApolloProvider client={apolloClient}>
+        <AuthProvider><SafeAreaProvider><Navigation /><AppBanner /></SafeAreaProvider></AuthProvider>
+      </ApolloProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -45,6 +49,8 @@ const Navigation = () => {
           <Stack.Screen name="class/[id]" />
           <Stack.Screen name="grades/[id]" />
           <Stack.Screen name="student/[id]" />
+          <Stack.Screen name="section/[id]/attendance" />
+          <Stack.Screen name="settings" />
         </Stack></>;
 }
 

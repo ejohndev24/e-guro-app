@@ -5,10 +5,11 @@ import { STUDENT_FIELDS } from '@/features/students/graphql/fragments/studentFie
 export const REPORTS_QUERY = gql`
   ${CLASS_FIELDS}
   ${STUDENT_FIELDS}
-  query Reports {
-    dashboard {
-      stats { classCount studentCount attendanceRate pendingGrades }
+  query Reports($quarter: Int!) {
+    dashboard(quarter: $quarter) {
+      stats { classCount studentCount attendanceRate pendingGrades averageGrade }
       atRisk { student { ...StudentFields } classroom { ...ClassFields } currentGrade }
+      gradeReports { classroom { ...ClassFields } averageGrade gradedStudents studentCount passingStudents }
     }
   }
 `;

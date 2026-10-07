@@ -10,7 +10,7 @@ export const STUDENT_QUERY = gql`
       student { ...StudentFields }
       overallGrade attendanceRate
       classes { classroom { ...ClassFields } averageGrade attendanceRate }
-      recentAttendance { id date checkedAt status }
+      recentAttendance { id date checkedAt status scope }
       grades { id quarter quiz activity exam finalGrade }
     }
   }

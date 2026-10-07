@@ -31,7 +31,7 @@ export const StatusPill = ({ status }: { status: string }) => {
 }
 
 export const LoadingState = () => {
-  return <View style={styles.state}><ActivityIndicator color={colors.primary} size="large" /><Text style={styles.stateText}>Loading your classroom…</Text></View>;
+  return <View style={styles.state}><ActivityIndicator color={colors.primary} size="large" /><Text style={styles.stateText}>Loading…</Text></View>;
 }
 
 export const ErrorState = ({ message, retry }: { message?: string; retry?: () => void }) => {

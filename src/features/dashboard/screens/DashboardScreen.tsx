@@ -43,9 +43,9 @@ const DashboardScreen = () => {
   const todaysClasses = dashboard.classes.filter((item) => item.scheduleDay.split(',').some((day) => day.trim().toLowerCase() === weekday.toLowerCase()));
 
   return (
-    <ScrollView style={styles.full} contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} tintColor="#fff" />}>
+    <ScrollView style={styles.full} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} tintColor="#fff" />}>
       <View style={[styles.hero, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.heroTop}><Ionicons name="menu" size={24} color="#fff" /><Text style={styles.brand}>E-Guro App</Text><Pressable onPress={signOut} hitSlop={10}><Ionicons name="log-out-outline" size={22} color="#fff" /></Pressable></View>
+        <View style={styles.heroTop}><Pressable onPress={() => router.push('/settings' as never)} hitSlop={10}><Ionicons name="settings-outline" size={24} color="#fff" /></Pressable><Text style={styles.brand}>E-Guro</Text><Pressable onPress={signOut} hitSlop={10}><Ionicons name="log-out-outline" size={22} color="#fff" /></Pressable></View>
         <Text style={styles.greeting}>Good morning, {dashboard.teacherName.split(' ')[0]}!</Text>
         <Text style={styles.date}>{today}</Text>
       </View>

@@ -13,7 +13,7 @@ export const GRADE_ROSTER_QUERY = gql`
         id name weight
         assessments { id title maxScore scores { studentId score } }
       }
-      students { student { ...StudentFields } finalGrade }
+      students { student { ...StudentFields } initialGrade finalGrade }
     }
   }
 `;

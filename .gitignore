@@ -13,8 +13,17 @@ dist/
 android/.gradle/
 android/build/
 android/app/build/
+android/local.properties
+android/keystore.properties
 ios/Pods/
 ios/build/
+
+# Installable build artifacts and local tooling
+*.apk
+*.aab
+coverage/
+.idea/
+.vscode/
 
 # Hosting
 .vercel/
