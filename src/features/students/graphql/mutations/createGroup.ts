@@ -1,15 +1,36 @@
-import { gql } from '@apollo/client';
-import { STUDENT_FIELDS } from '../fragments/studentFields';
-import { CLASS_FIELDS } from '@/features/classes/graphql/fragments/classFields';
+/*
+ * Copyright (c) Emil John Benitez, 2026. All rights reserved. This computer
+ * program is protected by copyright laws  and international treaties, and it
+ * or any part thereof, may not be copied,  reproduced, utilized, distributed
+ * or an adaptation thereof be made,  without the prior authority and consent
+ * of PharmaServ Express.  Any unauthorized use of this program will be dealt
+ * with and  prosecuted to the maximum extent possible under  the law and may
+ * result in civil and criminal liabilities.
+ */
+import { gql } from "@apollo/client";
+import { STUDENT_FIELDS } from "@/features/students/graphql/fragments/studentFields";
+import { CLASS_FIELDS } from "@/features/classes/graphql/fragments/classFields";
 
 export const CREATE_STUDENT_GROUP_MUTATION = gql`
   ${STUDENT_FIELDS}
   ${CLASS_FIELDS}
   mutation CreateStudentGroup($input: CreateStudentGroupInput!) {
     createStudentGroup(input: $input) {
-      id gradeLevel section schoolYear term educationLevel displayName studentCount isAdvisory
-      classes { ...ClassFields }
-      students { ...StudentFields }
+      id
+      gradeLevel
+      section
+      schoolYear
+      term
+      educationLevel
+      displayName
+      studentCount
+      isAdvisory
+      classes {
+        ...ClassFields
+      }
+      students {
+        ...StudentFields
+      }
     }
   }
 `;

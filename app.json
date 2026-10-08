@@ -29,7 +29,11 @@
       "bundleIdentifier": "com.eguro.app"
     },
     "android": {
-      "package": "com.eguro.app"
+      "package": "com.eguro.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/e-guro-icon.png",
+        "backgroundColor": "#075DDF"
+      }
     },
     "web": {
       "bundler": "metro"

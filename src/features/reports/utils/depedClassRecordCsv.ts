@@ -1,35 +1,55 @@
-import { Gradebook } from '@/core/types';
+/*
+ * Copyright (c) Emil John Benitez, 2026. All rights reserved. This computer
+ * program is protected by copyright laws  and international treaties, and it
+ * or any part thereof, may not be copied,  reproduced, utilized, distributed
+ * or an adaptation thereof be made,  without the prior authority and consent
+ * of PharmaServ Express.  Any unauthorized use of this program will be dealt
+ * with and  prosecuted to the maximum extent possible under  the law and may
+ * result in civil and criminal liabilities.
+ */
+import { Gradebook } from "@/core/types";
 
 const csvCell = (value: string | number | undefined | null) => {
-  const text = value == null ? '' : String(value);
+  const text = value == null ? "" : String(value);
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };
 
-const row = (values: Array<string | number | undefined | null>) => values.map(csvCell).join(',');
-const rounded = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+const row = (values: Array<string | number | undefined | null>) =>
+  values.map(csvCell).join(",");
+const rounded = (value: number) =>
+  Math.round((value + Number.EPSILON) * 100) / 100;
 
-export const createDepEdClassRecordCsv = (gradebook: Gradebook, quarter: number) => {
+export const createDepEdClassRecordCsv = (
+  gradebook: Gradebook,
+  quarter: number,
+) => {
   const { classroom, categories, students } = gradebook;
   const lines: string[] = [
-    row(['E-GURO QUARTERLY CLASS RECORD']),
-    row(['Subject', classroom.subject]),
-    row(['Grade/Year and Section', `${classroom.gradeLevel} - ${classroom.section}`]),
-    row(['School Year', classroom.schoolYear]),
-    row(['Term', classroom.term]),
-    row(['Grading Period', `Quarter ${quarter}`]),
-    row(['Grading Template', gradebook.schemeName ?? '']),
-    '',
+    row(["E-GURO QUARTERLY CLASS RECORD"]),
+    row(["Subject", classroom.subject]),
+    row([
+      "Grade/Year and Section",
+      `${classroom.gradeLevel} - ${classroom.section}`,
+    ]),
+    row(["School Year", classroom.schoolYear]),
+    row(["Term", classroom.term]),
+    row(["Grading Period", `Quarter ${quarter}`]),
+    row(["Grading Template", gradebook.schemeName ?? ""]),
+    "",
   ];
 
-  const header: Array<string | number> = ['Student Number', 'Learner Name'];
+  const header: Array<string | number> = ["Student Number", "Student Name"];
   for (const category of categories) {
-    for (const assessment of category.assessments) header.push(`${category.name} - ${assessment.title} (${assessment.maxScore})`);
+    for (const assessment of category.assessments)
+      header.push(
+        `${category.name} - ${assessment.title} (${assessment.maxScore})`,
+      );
     header.push(`${category.name} - Total Raw`);
     header.push(`${category.name} - Highest Possible`);
     header.push(`${category.name} - PS`);
     header.push(`${category.name} - WS (${category.weight}%)`);
   }
-  header.push('Initial Grade', 'Quarterly Grade', 'Remarks');
+  header.push("Initial Grade", "Quarterly Grade", "Remarks");
   lines.push(row(header));
 
   for (const entry of students) {
@@ -45,40 +65,84 @@ export const createDepEdClassRecordCsv = (gradebook: Gradebook, quarter: number)
       let possible = 0;
       let categoryComplete = category.assessments.length > 0;
       for (const assessment of category.assessments) {
-        const score = assessment.scores.find((item) => item.studentId === entry.student.id)?.score;
+        const score = assessment.scores.find(
+          (item) => item.studentId === entry.student.id,
+        )?.score;
         values.push(score);
         if (score == null) categoryComplete = false;
         else earned += score;
         possible += assessment.maxScore;
       }
       complete = complete && categoryComplete;
-      const percentageScore = categoryComplete && possible > 0 ? (earned / possible) * 100 : undefined;
-      const weightedScore = percentageScore === undefined ? undefined : percentageScore * (category.weight / 100);
+      const percentageScore =
+        categoryComplete && possible > 0
+          ? (earned / possible) * 100
+          : undefined;
+      const weightedScore =
+        percentageScore === undefined
+          ? undefined
+          : percentageScore * (category.weight / 100);
       if (weightedScore !== undefined) calculatedInitial += weightedScore;
-      values.push(categoryComplete ? rounded(earned) : '', rounded(possible), percentageScore === undefined ? '' : rounded(percentageScore), weightedScore === undefined ? '' : rounded(weightedScore));
+      values.push(
+        categoryComplete ? rounded(earned) : "",
+        rounded(possible),
+        percentageScore === undefined ? "" : rounded(percentageScore),
+        weightedScore === undefined ? "" : rounded(weightedScore),
+      );
     }
 
-    const initialGrade = entry.initialGrade ?? (complete ? rounded(calculatedInitial) : undefined);
+    const initialGrade =
+      entry.initialGrade ?? (complete ? rounded(calculatedInitial) : undefined);
     const quarterlyGrade = entry.finalGrade;
-    values.push(initialGrade, quarterlyGrade, quarterlyGrade == null ? 'INCOMPLETE' : quarterlyGrade >= 75 ? 'PASSED' : 'FAILED');
+    values.push(
+      initialGrade,
+      quarterlyGrade,
+      quarterlyGrade == null
+        ? "INCOMPLETE"
+        : quarterlyGrade >= 75
+          ? "PASSED"
+          : "FAILED",
+    );
     lines.push(row(values));
   }
 
-  lines.push('', row(['PS', 'Percentage Score']), row(['WS', 'Weighted Score']));
-  lines.push(row(['Generated by', 'E-Guro']));
-  return `\uFEFF${lines.join('\r\n')}`;
+  lines.push(
+    "",
+    row(["PS", "Percentage Score"]),
+    row(["WS", "Weighted Score"]),
+  );
+  lines.push(row(["Generated by", "E-Guro"]));
+  return `\uFEFF${lines.join("\r\n")}`;
 };
 
 export const classRecordFileName = (gradebook: Gradebook, quarter: number) => {
-  const safe = (value: string) => value.trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '');
+  const safe = (value: string) =>
+    value
+      .trim()
+      .replace(/[^a-z0-9_-]+/gi, "-")
+      .replace(/^-|-$/g, "");
   return `${safe(gradebook.classroom.subject)}_${safe(gradebook.classroom.section)}_${safe(gradebook.classroom.schoolYear)}_Q${quarter}.csv`;
 };
 
-export const combinedClassRecordsFileName = (subject: string, schoolYear: string, quarter: number) => {
-  const safe = (value: string) => value.trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '');
+export const combinedClassRecordsFileName = (
+  subject: string,
+  schoolYear: string,
+  quarter: number,
+) => {
+  const safe = (value: string) =>
+    value
+      .trim()
+      .replace(/[^a-z0-9_-]+/gi, "-")
+      .replace(/^-|-$/g, "");
   return `${safe(subject)}_All-Sections_${safe(schoolYear)}_Q${quarter}.csv`;
 };
 
-export const createCombinedClassRecordsCsv = (gradebooks: Gradebook[], quarter: number) => `\uFEFF${gradebooks
-  .map((gradebook) => createDepEdClassRecordCsv(gradebook, quarter).replace(/^\uFEFF/, ''))
-  .join('\r\n\r\n')}`;
+export const createCombinedClassRecordsCsv = (
+  gradebooks: Gradebook[],
+  quarter: number,
+) =>
+  `\uFEFF${gradebooks
+    .map((gradebook) =>
+      createDepEdClassRecordCsv(gradebook, quarter).replace(/^\uFEFF/, ""),
+    )
+    .join("\r\n\r\n")}`;

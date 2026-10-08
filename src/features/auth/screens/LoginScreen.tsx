@@ -1,7 +1,17 @@
+/*
+ * Copyright (c) Emil John Benitez, 2026. All rights reserved. This computer
+ * program is protected by copyright laws and international treaties, and it
+ * or any part thereof, may not be copied, reproduced, utilized, distributed
+ * or an adaptation thereof be made, without the prior authority and consent
+ * of PharmaServ Express. Any unauthorized use of this program will be dealt
+ * with and prosecuted to the maximum extent possible under the law and may
+ * result in civil and criminal liabilities.
+ */
 import { useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
+import { moderateScale } from "react-native-size-matters";
 import {
   Alert,
   Image,
@@ -20,9 +30,9 @@ import {
   CHANGE_PASSWORD_MUTATION,
   LOGIN_MUTATION,
   REGISTER_TEACHER_MUTATION,
-} from "../graphql/mutations/authMutations";
-import { colors } from "@/core/theme";
-
+} from "@/features/auth/graphql/mutations/authMutations";
+import { theme } from "@/core/theme";
+const { spacing, typography, colors, borderRadius } = theme;
 const LoginScreen = () => {
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
@@ -36,10 +46,14 @@ const LoginScreen = () => {
   const [login, loginState] = useMutation(LOGIN_MUTATION);
   const [register, registerState] = useMutation(REGISTER_TEACHER_MUTATION);
   const [change, changeState] = useMutation(CHANGE_PASSWORD_MUTATION);
-
   const submitLogin = async () => {
     try {
-      const result = await login({ variables: { email, password } });
+      const result = await login({
+        variables: {
+          email,
+          password,
+        },
+      });
       const payload = result.data?.login;
       if (!payload) return;
       if (payload.user.role !== "TEACHER") {
@@ -58,7 +72,6 @@ const LoginScreen = () => {
       } else await signIn(payload.accessToken);
     } catch {}
   };
-
   const submitRegister = async () => {
     if (name.trim().length < 2)
       return Alert.alert("Enter your name", "Please enter your full name.");
@@ -74,21 +87,30 @@ const LoginScreen = () => {
       );
     try {
       const result = await register({
-        variables: { input: { name, email, password } },
+        variables: {
+          input: {
+            name,
+            email,
+            password,
+          },
+        },
       });
       const token = result.data?.registerTeacher.accessToken;
       if (token) await signIn(token);
     } catch {}
   };
-
   const submitChange = async () => {
     if (!pendingToken) return;
     try {
-      await change({ variables: { currentPassword: password, newPassword } });
+      await change({
+        variables: {
+          currentPassword: password,
+          newPassword,
+        },
+      });
       await signIn(pendingToken);
     } catch {}
   };
-
   const changing = Boolean(pendingToken);
   const busy = registering ? registerState.loading : loginState.loading;
   const error = (registering ? registerState.error : loginState.error)?.message;
@@ -102,18 +124,22 @@ const LoginScreen = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 18 },
+          {
+            paddingTop: insets.top + spacing(2.25),
+            paddingBottom: insets.bottom + spacing(2.25),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.hero}>
           <View style={styles.logo}>
             <Image
-              source={require("../../../../assets/images/e-guro-icon.png")}
+              source={require("@assets/images/e-guro-icon.png")}
               style={styles.logoImage}
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.appTitle}>E-Guro</Text>
           <Text style={styles.tagline}>
             {changing
               ? "Secure your new account"
@@ -236,7 +262,9 @@ const LoginScreen = () => {
                 onPress={submitChange}
                 style={[
                   styles.button,
-                  newPassword.length < 10 && { opacity: 0.5 },
+                  newPassword.length < 10 && {
+                    opacity: 0.5,
+                  },
                 ]}
               >
                 <Text style={styles.buttonText}>
@@ -257,7 +285,6 @@ const LoginScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
 const Field = ({
   icon,
   placeholder,
@@ -273,12 +300,12 @@ const Field = ({
 }) => {
   return (
     <View style={styles.field}>
-      <Ionicons name={icon} size={19} color={colors.muted} />
+      <Ionicons name={icon} size={moderateScale(19)} color={colors.muted} />
       <TextInput
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
-        placeholderTextColor="#98A2B3"
+        placeholderTextColor={colors.placeholder}
         autoCapitalize="none"
         autoCorrect={false}
         secureTextEntry={secure}
@@ -289,80 +316,143 @@ const Field = ({
 };
 const ErrorText = ({ error }: { error?: string }) =>
   error ? <Text style={styles.error}>{error}</Text> : null;
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.primary },
-  content: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
-  hero: { alignItems: "center", marginBottom: 20 },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: spacing(2.5),
+  },
+  appTitle: {
+    color: colors.surface,
+    fontSize: typography.fontSize.extraLarge,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bold,
+  },
+  hero: {
+    alignItems: "center",
+    marginBottom: spacing(2.5),
+  },
   logo: {
-    width: 100,
-    height: 100,
+    width: moderateScale(100),
+    height: moderateScale(100),
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
-  logoImage: { width: "100%", height: "100%" },
-  brand: { color: "#fff", fontSize: 25, fontWeight: "800", marginTop: 10 },
-  tagline: { color: "#D9E8FF", marginTop: 4 },
-  card: { backgroundColor: "#fff", borderRadius: 22, padding: 22 },
+  logoImage: {
+    width: "100%",
+    height: "100%",
+  },
+  brand: {
+    fontFamily: typography.fontFamily.bold,
+    color: colors.surface,
+    fontSize: typography.fontSize.extraLarge,
+    lineHeight: typography.lineHeight.extraLarge,
+    fontWeight: typography.fontWeight.bold,
+    marginTop: spacing(1.25),
+  },
+  tagline: {
+    fontFamily: typography.fontFamily.regular,
+    color: colors.brandTextSoft,
+    fontSize: typography.fontSize.medium,
+    lineHeight: typography.lineHeight.medium,
+    marginTop: spacing(0.5),
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.large,
+    padding: spacing(2.75),
+  },
   switcher: {
     flexDirection: "row",
     backgroundColor: colors.background,
-    borderRadius: 10,
-    padding: 3,
-    marginBottom: 18,
+    borderRadius: borderRadius.medium,
+    padding: spacing(0.375),
+    marginBottom: spacing(2.25),
   },
   switch: {
     flex: 1,
-    height: 36,
+    height: moderateScale(36),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    borderRadius: borderRadius.medium,
   },
-  switchActive: { backgroundColor: "#fff" },
-  switchText: { color: colors.muted, fontSize: 12, fontWeight: "700" },
-  switchTextActive: { color: colors.primary },
+  switchActive: {
+    backgroundColor: colors.surface,
+  },
+  switchText: {
+    color: colors.muted,
+    fontSize: typography.fontSize.small,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bold,
+  },
+  switchTextActive: {
+    color: colors.primary,
+  },
   eyebrow: {
     color: colors.primary,
-    fontSize: 10,
-    fontWeight: "800",
+    fontSize: typography.fontSize.extraSmall,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1.5,
+    fontFamily: typography.fontFamily.bold,
   },
-  title: { color: colors.text, fontSize: 24, fontWeight: "800", marginTop: 5 },
+  title: {
+    color: colors.text,
+    fontSize: typography.fontSize.extraLarge,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bold,
+  },
   help: {
     color: colors.muted,
-    lineHeight: 19,
-    fontSize: 12,
-    marginTop: 6,
-    marginBottom: 8,
+    lineHeight: typography.lineHeight.medium,
+    fontSize: typography.fontSize.small,
+    marginBottom: spacing(0.5),
+    fontFamily: typography.fontFamily.regular,
   },
   field: {
-    height: 48,
-    marginTop: 10,
-    borderRadius: 12,
-    borderWidth: 1,
+    height: moderateScale(48),
+    marginTop: spacing(1.25),
+    borderRadius: borderRadius.large,
+    borderWidth: moderateScale(1),
     borderColor: colors.border,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 13,
+    paddingHorizontal: spacing(1.625),
   },
-  input: { flex: 1, color: colors.text, marginLeft: 9 },
+  input: {
+    flex: 1,
+    color: colors.text,
+    marginLeft: spacing(1.125),
+  },
   button: {
-    height: 50,
-    borderRadius: 12,
+    height: moderateScale(50),
+    borderRadius: borderRadius.large,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 17,
+    marginTop: spacing(2.125),
   },
-  buttonText: { color: "#fff", fontWeight: "800" },
-  error: { color: colors.danger, fontSize: 11, marginTop: 10 },
+  buttonText: {
+    color: colors.surface,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bold,
+  },
+  error: {
+    color: colors.danger,
+    fontSize: typography.fontSize.small,
+    marginTop: spacing(1.25),
+    fontFamily: typography.fontFamily.regular,
+  },
   footer: {
-    color: "#C9DDFB",
-    fontSize: 11,
+    color: colors.brandTextMuted,
+    fontSize: typography.fontSize.small,
     textAlign: "center",
-    marginTop: 16,
+    marginTop: spacing(2),
+    fontFamily: typography.fontFamily.regular,
   },
 });
-
 export default LoginScreen;
